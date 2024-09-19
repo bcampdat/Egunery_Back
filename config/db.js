@@ -1,8 +1,8 @@
-const mysql = require("mysql");
+const mysql = require("mysql2"); // Usar mysql2 para unificar
 
 require("dotenv").config();
 
-
+// Configurar la conexión a la base de datos
 const db = mysql.createConnection({
   user: process.env.DB_USER || "root",
   host: process.env.DB_HOST || "localhost",
@@ -11,6 +11,7 @@ const db = mysql.createConnection({
   port: process.env.DB_PORT || 3306,
 });
 
+// Conectar a la base de datos
 db.connect((err) => {
   if (err) {
     console.error("Error conectando a la base de datos:", err);
@@ -19,6 +20,5 @@ db.connect((err) => {
     console.log("Conectado a la base de datos MySQL");
   }
 });
-
 
 module.exports = db;
