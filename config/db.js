@@ -1,9 +1,9 @@
-const mysql = require("mysql2"); // Usar mysql2 para unificar
+const mysql = require("mysql"); 
 
-require("dotenv").config();
+require("dotenv").config({ path: "./.env" });
 
 // Configurar la conexión a la base de datos
-const db = mysql.createConnection({
+const db =  mysql.createConnection({
   user: process.env.DB_USER || "root",
   host: process.env.DB_HOST || "localhost",
   database: process.env.DB_NAME || "mycap_stone",
