@@ -33,7 +33,7 @@ router.post("/posts/upload-editor-image", editorImageUpload, (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: "No se proporcionó ninguna imagen" });
   }
-  const imageUrl = `/MyUploads/editorImages/${req.file.filename}`; // La URL relativa de la imagen subida
+  const imageUrl = `${process.env.BASE_URL/MyUploads/editorImages}/${req.file.filename}`; // La URL relativa de la imagen subida
   res.status(200).json({ url: imageUrl });
 });
 
@@ -68,7 +68,7 @@ router.get("/posts/:id", (req, res) => {
 // Ruta para crear un nuevo post
 router.post("/posts/create", morgan("dev"), featuredImageUpload, (req, res) => {
   const { title, content, usuario_id } = req.body;
-  const featuredImage = req.file ? `/MyUploads/featuredImages/${req.file.filename}` : null;
+  const featuredImage = req.file ? `${process.env.BASE_URL}/MyUploads/featuredImages/${req.file.filename}` : null;
 
   if (!title || !content || !usuario_id) {
     return res.status(400).json({ message: "Todos los campos son obligatorios" });
@@ -89,7 +89,7 @@ router.post("/posts/create", morgan("dev"), featuredImageUpload, (req, res) => {
 router.put("/posts/update/:id", morgan("dev"), featuredImageUpload, (req, res) => {
   const postId = req.params.id;
   const { title, content, usuario_id, remove_image } = req.body; 
-  const newFeaturedImage = req.file ? `/MyUploads/featuredImages/${req.file.filename}` : null;
+  const newFeaturedImage = req.file ? `${process.env.BASE_URL}/MyUploads/featuredImages/${req.file.filename}` : null;
 
   // Consulta para verificar si el post pertenece al usuario autenticado
   const qSelect = `
