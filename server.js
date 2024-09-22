@@ -37,16 +37,26 @@ app.get("/", (req, res) => {
 // Create HTTPS server
 const server = https.createServer(options, app);
 
-//CORS
+const allowedOrigins = ['http://localhost:5173', 'https://egunery.netlify.app'];
+
 const corsOptions = {
-  origin: process.env.URLFRONTEND || 'http://localhost:5173',
+  origin: function (origin, callback) {
+    // Si el origen está en la lista de orígenes permitidos o no existe (solicitudes internas), permitimos el acceso
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   allowedHeaders: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization',
   credentials: true,
-  proxy : true,
-  samesite : 'none',
+  proxy: true,
+  samesite: 'none',
 };
-app.use(cors( corsOptions ));
+
+app.use(cors(corsOptions));
+
 
 app.use(express.json());
 
