@@ -2,11 +2,11 @@ const express = require('express');
 const router = express.Router();
 const morgan = require('morgan');
 const db = require('../config/db');
-const moment = require('moment'); // Importar moment
+const moment = require('moment'); 
 
 // Ruta para obtener todos los eventos del usuario logueado
 router.get('/events', (req, res) => {
-  const usuario_id = req.query.usuario_id; // Asumimos que usuario_id se envía como query param
+  const usuario_id = req.query.usuario_id;
 
   if (!usuario_id) {
     return res.status(400).json({ message: "Usuario no autenticado" });
@@ -51,19 +51,14 @@ router.post('/events/create', morgan('dev'), (req, res) => {
   const formattedStart = moment(start).format('YYYY-MM-DD HH:mm:ss');
   const formattedEnd = moment(end).format('YYYY-MM-DD HH:mm:ss');
 
-  // Consulta para insertar el evento en la base de datos
   const q = "INSERT INTO eventos (title, content, start, end, usuario_id) VALUES (?, ?, ?, ?, ?)";
-
   db.query(q, [title, content, formattedStart, formattedEnd, usuario_id], (err, result) => {
     if (err) {
       console.error("Error al crear el evento:", err);
       return res.status(500).json({ message: "Error al crear el evento" });
     }
 
-    // Obtener el ID del evento recién creado
     const eventId = result.insertId;
-
-    // Responder con éxito y devolver el ID del evento
     return res.status(201).json({ message: "Evento creado con éxito", eventId });
   });
 });
@@ -72,6 +67,15 @@ router.post('/events/create', morgan('dev'), (req, res) => {
 router.put('/events/update/:id', (req, res) => {
   const eventId = req.params.id;
   const { title, content, start, end, usuario_id } = req.body;
+
+  // Validar si todos los campos obligatorios están presentes
+  if (!title || !content || !start || !end || !usuario_id) {
+    return res.status(400).json({ message: "Todos los campos son obligatorios" });
+  }
+
+  // Formatear las fechas antes de actualizar el evento
+  const formattedStart = moment(start).format('YYYY-MM-DD HH:mm:ss');
+  const formattedEnd = moment(end).format('YYYY-MM-DD HH:mm:ss');
 
   // Verificar si el usuario es propietario del evento
   const qSelect = "SELECT * FROM eventos WHERE id_events = ? AND usuario_id = ?";
@@ -85,9 +89,9 @@ router.put('/events/update/:id', (req, res) => {
       return res.status(403).json({ message: "No autorizado para actualizar este evento" });
     }
 
-    // Actualizar el evento (no es necesario formatear la fecha aquí)
+    // Actualizar el evento con las fechas formateadas
     const qUpdate = "UPDATE eventos SET title = ?, content = ?, start = ?, end = ? WHERE id_events = ?";
-    db.query(qUpdate, [title, content, start, end, eventId], (err) => {
+    db.query(qUpdate, [title, content, formattedStart, formattedEnd, eventId], (err) => {
       if (err) {
         console.error("Error al actualizar el evento:", err);
         return res.status(500).json({ message: "Error al actualizar el evento" });
@@ -100,7 +104,7 @@ router.put('/events/update/:id', (req, res) => {
 // Ruta para eliminar un evento
 router.delete('/events/delete/:id', morgan('dev'), (req, res) => {
   const eventId = req.params.id;
-  const usuario_id = req.query.usuario_id; // Obtenemos el usuario_id desde el query param
+  const usuario_id = req.query.usuario_id;
 
   // Verificar si el usuario es propietario del evento
   const qCheckOwnership = "SELECT * FROM eventos WHERE id_events = ? AND usuario_id = ?";
@@ -110,12 +114,11 @@ router.delete('/events/delete/:id', morgan('dev'), (req, res) => {
       return res.status(500).json({ message: "Error del servidor" });
     }
 
-    // Si el evento no existe o no pertenece al usuario, devolver un error 403
     if (result.length === 0) {
       return res.status(403).json({ message: "No tienes permiso para eliminar este evento" });
     }
 
-    // Eliminar el evento si pertenece al usuario
+    // Eliminar el evento
     const qDelete = "DELETE FROM eventos WHERE id_events = ?";
     db.query(qDelete, [eventId], (err) => {
       if (err) {
