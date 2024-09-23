@@ -3,5 +3,6 @@ node_modules/
 *.sql
 sql/
 seg/
-
+*.localhost-key.pem
+*.localhost.pem
 
